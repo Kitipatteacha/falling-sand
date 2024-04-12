@@ -2,10 +2,11 @@
 <html>
   <style>
     .flex-container {
+      margin: 0;
       display: flex;
       justify-content: center;
       align-items: center;
-      height: 100vh;
+      height: 100dvh;
     }
   </style>
   <body class="flex-container">
@@ -19,8 +20,8 @@
       const pixelSize = 8;
 
       function initializeCanvas() {
-        widthPixelCount = Math.floor(window.innerWidth / pixelSize);
-        heightPixelCount = Math.floor(window.innerHeight / pixelSize);
+        widthPixelCount = Math.floor((window.innerWidth * 0.8) / pixelSize);
+        heightPixelCount = Math.floor((window.innerHeight * 0.8) / pixelSize);
         canvas.width = widthPixelCount * pixelSize;
         canvas.height = heightPixelCount * pixelSize;
 
