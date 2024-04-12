@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html>
+  <style>
+    .flex-container {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+    }
+  </style>
+  <body class="flex-container">
+    <canvas id="myCanvas"> Your browser does not support the HTML canvas tag. </canvas>
+
+    <script>
+      let canvas = document.getElementById('myCanvas');
+      let ctx = canvas.getContext('2d');
+      let widthPixelCount, heightPixelCount;
+      let array2D;
+      const pixelSize = 8;
+
+      function initializeCanvas() {
+        widthPixelCount = Math.floor(window.innerWidth / pixelSize);
+        heightPixelCount = Math.floor(window.innerHeight / pixelSize);
+        canvas.width = widthPixelCount * pixelSize;
+        canvas.height = heightPixelCount * pixelSize;
+
+        array2D = new Array(widthPixelCount).fill(0).map(() => new Array(heightPixelCount).fill(0));
+      }
+
+      initializeCanvas();
+
+      const getPixelGeneratePosition = (mousePosX, mousePosY) => {
+        let pixelShift = 0;
+        const random = Math.random();
+        if (random < 0.33) {
+          pixelShift = 1;
+        } else if (random < 0.66) {
+          pixelShift = -1;
+        }
+
+        if (mousePosX + pixelShift > 0 && mousePosX + pixelShift < widthPixelCount) {
+          return {
+            x: mousePosX + pixelShift,
+            y: mousePosY,
+          };
+        } else {
+          return {
+            x: mousePosX,
+            y: mousePosY,
+          };
+        }
+      };
+
+      let isClick = false;
+
+      canvas.addEventListener('click', function (event) {
+        isClick = !isClick;
+      });
+
+      canvas.addEventListener('mousemove', function (event) {
+        if (isClick) {
+          const rect = canvas.getBoundingClientRect();
+          let pixelShift = 0;
+          const random = Math.random();
+          if (random < 0.33) {
+            pixelShift = 1;
+          } else if (random < 0.66) {
+            pixelShift = -1;
+          }
+
+          const { x, y } = getPixelGeneratePosition(
+            Math.floor((event.clientX - rect.left) / pixelSize),
+            Math.floor((event.clientY - rect.top) / pixelSize)
+          );
+
+          array2D[x][y] = 1;
+        }
+      });
+
+      const animate = () => {
+        draw();
+        window.requestAnimationFrame(animate);
+      };
+
+      const drawGrid = () => {
+        for (let i = 0; i <= widthPixelCount; i += 1) {
+          ctx.beginPath();
+          ctx.moveTo(i * pixelSize, 0);
+          ctx.lineTo(i * pixelSize, heightPixelCount * pixelSize);
+          ctx.strokeStyle = 'rgba(0,0,0,0.1)';
+          ctx.stroke();
+        }
+
+        for (let i = 0; i <= heightPixelCount; i += 1) {
+          ctx.beginPath();
+          ctx.moveTo(0, i * pixelSize);
+          ctx.lineTo(widthPixelCount * pixelSize, i * pixelSize);
+          ctx.strokeStyle = 'rgba(0,0,0,0.1)';
+          ctx.stroke();
+        }
+      };
+
+      const drawPixel = () => {
+        const temp2DArray = structuredClone(array2D);
+
+        for (let i = 0; i < widthPixelCount; i++) {
+          for (let j = 0; j < heightPixelCount; j++) {
+            if (array2D[i][j] === 1) {
+              ctx.fillStyle = 'black';
+              ctx.fillRect(i * pixelSize, j * pixelSize, pixelSize, pixelSize);
+
+              if (j < heightPixelCount - 1) {
+                if (array2D[i][j + 1] === 0) {
+                  temp2DArray[i][j] = 0;
+                  temp2DArray[i][j + 1] = 1;
+                } else if (i < widthPixelCount - 1 && array2D[i + 1][j + 1] === 0) {
+                  temp2DArray[i][j] = 0;
+                  temp2DArray[i + 1][j + 1] = 1;
+                } else if (i > 0 && array2D[i - 1][j + 1] === 0) {
+                  temp2DArray[i][j] = 0;
+                  temp2DArray[i - 1][j + 1] = 1;
+                }
+              }
+            }
+          }
+        }
+
+        array2D = structuredClone(temp2DArray);
+      };
+
+      const draw = () => {
+        ctx.clearRect(0, 0, widthPixelCount * pixelSize, heightPixelCount * pixelSize);
+        drawGrid();
+        drawPixel();
+      };
+
+      animate();
+    </script>
+  </body>
+</html>
